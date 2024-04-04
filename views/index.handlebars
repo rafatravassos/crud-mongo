@@ -12,10 +12,14 @@
 
 {{#each posts}}
 <div class="card">
-  <div class="card-body">
+  <div class="card-body mt-4">
       <h3>{{title}}</h3>
       <p>{{description}}</p>
       <p>{{content}}</p>
+      <hr>
+      <a href="/post/{{slug}}"><button class="btn btn-success">Read more</button></a><br>
+      <small>Category: {{category.name}}</small><br>
+      <small>Publish date: {{date}}</small>
   </div>
 </div>
 {{else}}

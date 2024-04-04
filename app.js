@@ -73,6 +73,44 @@ app.listen({
     console.log("server running on port:", PORT)
 })
 
+app.get("/post/:slug", (req, res) => {
+    Post.findOne({slug: req.params.slug}).lean().then((post) => {
+        if (post) {
+            res.render("post/index", {post})
+        } else {
+            req.flash("error_msg", "This post does not exists")
+            res.redirect("/")
+        }
+    }).catch((err) => {
+        req.flash("error_msg", "Internal error")
+        res.redirect("/")
+    })
+})
+
+app.get("/categories", (req, res) => {
+    Category.find().lean().then( (categories) => {
+        res.render("categories/index", {categories})
+    }).catch((err) => {
+        req.flash("error_msg", "Internal error")
+        res.redirect("/")
+    })
+})
+
+app.get("/categories/:slug", (req, res) => {
+    Category.findOne({slug: req.params.slug}).lean().then((category) => {
+        if (category) {
+            Post.find({category: category._id}).lean().then((posts) => {
+                res.render("categories/posts", {posts, category})
+            })
+        } else {
+            req.flash("error_msg", "Internal error - Categories")
+            res.redirect("/categories")
+        }
+    }).catch((err) => {
+        req.flash("error_msg", "Internal error - Categories")
+        res.redirect("/")
+    })
+})
 
 
 
