@@ -9,16 +9,23 @@ import flash from "connect-flash"
 import mongoose from "mongoose"
 import "./models/Category.js"
 import "./models/Posts.js"
+import "./models/User.js"
+import "passport"
 const Category = mongoose.model("categories")
 const Post = mongoose.model("posts")
 
+import configurePassport from "./config/auth.js" 
+
 
 import { router } from "./routes/admin.js"
+import { routerUser } from "./routes/user.js"
 import * as path from "path"
+import passport from "passport"
 
 const app = express()
 const admin = router
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
 
 // Setups
     //Sessions
@@ -27,12 +34,19 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
         resave: true,
         saveUninitialized: true,
     }))
+
+    app.use(passport.initialize())
+    app.use(passport.session())
+    
+
     app.use(flash())
     
     //Middleware
+    configurePassport(passport)
     app.use((req, res, next) => {
         res.locals.success_msg = req.flash("success_msg")
         res.locals.error_msg = req.flash("error_msg")
+        res.locals.error = req.flash("error")
         next()
     })
     // Body Parser
@@ -64,14 +78,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
     })
 
 
-// Others
-const PORT = process.env.PORT ?? 3333
-app.listen({
-    host: "0.0.0.0",
-    port: PORT
-}, () => {
-    console.log("server running on port:", PORT)
-})
 
 app.get("/post/:slug", (req, res) => {
     Post.findOne({slug: req.params.slug}).lean().then((post) => {
@@ -112,6 +118,14 @@ app.get("/categories/:slug", (req, res) => {
     })
 })
 
+app.use("/users", routerUser)
 
 
-
+// Others
+const PORT = process.env.PORT ?? 3333
+app.listen({
+    host: "0.0.0.0",
+    port: PORT
+}, () => {
+    console.log("server running on port:", PORT)
+})
